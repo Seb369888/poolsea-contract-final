@@ -1,0 +1,60 @@
+{
+  "roles": [
+    {
+      "name": "Pause role",
+      "id": "PAUSE_ROLE",
+      "params": []
+    },
+    {
+      "name": "Resume role",
+      "id": "RESUME_ROLE",
+      "params": []
+    },
+    {
+      "name": "Staking pause role",
+      "id": "STAKING_PAUSE_ROLE",
+      "params": []
+    },
+    {
+      "name": "Staking control role",
+      "id": "STAKING_CONTROL_ROLE",
+      "params": []
+    },
+    {
+      "name": "Unsafely change deposited validators",
+      "id": "UNSAFE_CHANGE_DEPOSITED_VALIDATORS_ROLE",
+      "params": []
+    }
+  ],
+  "environments": {
+    "default": {
+      "appName": "lido.lidopm.eth",
+      "network": "development"
+    },
+    "rinkeby": {
+      "appName": "lido.lidopm.eth",
+      "network": "rinkeby"
+    },
+    "mainnet-test": {
+      "appName": "lido.lidopm-pre.eth",
+      "network": "mainnet"
+    },
+    "mainnet": {
+      "appName": "lido.lidopm.eth",
+      "network": "mainnet"
+    },
+    "pulsechain": {
+      "appName": "lido.lidopm.eth",
+      "network": "pulsechain",
+      "registry": "0xEAB34897f673AdFd1379337985c7aB4D94e1E626"
+    },
+
+    "localhost": {
+      "appName": "lido.lidopm.eth",
+      "network": "development",
+      "registry": "0xa16E02E87b7454126E5E10d957A927A7F5B5d2be"
+    }
+  },
+  "appName": "lido.lidopm.eth",
+  "path": "../../contracts/0.4.24/Lido.sol"
+}
