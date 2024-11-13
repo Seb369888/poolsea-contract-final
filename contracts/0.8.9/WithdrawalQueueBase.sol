@@ -303,13 +303,51 @@ abstract contract WithdrawalQueueBase {
     /// @param _maxShareRate max share rate that will be used for request finalization (1e27 precision)
     /// @return ethToLock amount of ether that should be sent with `finalize()` method
     /// @return sharesToBurn amount of shares that belongs to requests that will be finalized
-    function prefinalize(uint256[] calldata _batches, uint256 _maxShareRate)
-        external
-        view
-        returns (uint256 ethToLock, uint256 sharesToBurn)
-    {
-        ethToLock = 0;
-        sharesToBurn = 0;
+    function prefinalize(
+        uint256[] calldata _batches,
+        uint256 _maxShareRate
+    ) external view returns (uint256 ethToLock, uint256 sharesToBurn) {
+        if (_maxShareRate == 0) revert ZeroShareRate();
+        if (_batches.length == 0) revert EmptyBatches();
+
+        if (_batches[0] <= getLastFinalizedRequestId())
+            revert InvalidRequestId(_batches[0]);
+        if (_batches[_batches.length - 1] > getLastRequestId())
+            revert InvalidRequestId(_batches[_batches.length - 1]);
+
+        uint256 currentBatchIndex;
+        uint256 prevBatchEndRequestId = getLastFinalizedRequestId();
+        WithdrawalRequest memory prevBatchEnd = _getQueue()[
+            prevBatchEndRequestId
+        ];
+        while (currentBatchIndex < _batches.length) {
+            uint256 batchEndRequestId = _batches[currentBatchIndex];
+            if (batchEndRequestId <= prevBatchEndRequestId)
+                revert BatchesAreNotSorted();
+
+            WithdrawalRequest memory batchEnd = _getQueue()[batchEndRequestId];
+
+            (
+                uint256 batchShareRate,
+                uint256 stETH,
+                uint256 shares
+            ) = _calcBatch(prevBatchEnd, batchEnd);
+
+            if (batchShareRate > _maxShareRate) {
+                // discounted
+                ethToLock += (shares * _maxShareRate) / E27_PRECISION_BASE;
+            } else {
+                // nominal
+                ethToLock += stETH;
+            }
+            sharesToBurn += shares;
+
+            prevBatchEndRequestId = batchEndRequestId;
+            prevBatchEnd = batchEnd;
+            unchecked {
+                ++currentBatchIndex;
+            }
+        }
     }
 
     /// @dev Finalize requests in the queue

@@ -376,11 +376,22 @@ abstract contract WithdrawalQueue is AccessControlEnumerable, PausableUntil, Wit
     function _requestWithdrawalWstETH(uint256 _amountOfWstETH, address _owner) internal returns (uint256 requestId) {
         WSTETH.transferFrom(msg.sender, address(this), _amountOfWstETH);
         uint256 amountOfStETH = WSTETH.unwrap(_amountOfWstETH);
+        _checkWithdrawalRequestAmount(amountOfStETH);
+
         uint256 amountOfShares = STETH.getSharesByPooledEth(amountOfStETH);
 
         requestId = _enqueue(uint128(amountOfStETH), uint128(amountOfShares), _owner);
 
         _emitTransfer(address(0), _owner, requestId);
+    }
+
+    function _checkWithdrawalRequestAmount(uint256 _amountOfStETH) internal pure {
+        if (_amountOfStETH < MIN_STETH_WITHDRAWAL_AMOUNT) {
+            revert RequestAmountTooSmall(_amountOfStETH);
+        }
+        if (_amountOfStETH > MAX_STETH_WITHDRAWAL_AMOUNT) {
+            revert RequestAmountTooLarge(_amountOfStETH);
+        }
     }
 
     /// @notice returns claimable ether under the request. Returns 0 if request is not finalized or claimed
